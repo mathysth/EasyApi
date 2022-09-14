@@ -1,8 +1,11 @@
-import { defaultConfig, pluginConfig } from './libs/templates/default';
+import {
+  defaultConfig,
+  loggerConfig,
+  pluginConfig
+} from './libs/templates/default';
 import { IEasyApiConfig, IPlugin } from './libs/types/config';
 import Fastify, { FastifyInstance } from 'fastify';
 import { IEvents } from './libs/types/events';
-import { fileURLToPath } from 'url';
 import PATH from 'path';
 import pino from 'pino';
 
@@ -16,14 +19,14 @@ enum AvailablePluginEnum {
 }
 
 export default class EasyApi {
-  readonly logger: any = pino({
-    transport: {
-      target: 'pino-pretty',
-      options: {
-        colorize: true
-      }
-    }
-  });
+  get logger(): any {
+    return this._logger;
+  }
+
+  set logger(value: any) {
+    this._logger = value;
+  }
+  private _logger: any;
   // Give possibilite to inject custom plugin in the futur
   readonly availablePlugins: (string | AvailablePluginEnum)[] = Object.values(
     AvailablePluginEnum
@@ -32,17 +35,6 @@ export default class EasyApi {
     { name: 'Sensible' },
     { name: 'UnderPressure' },
     { name: 'Cors', origin: '*' },
-    {
-      name: 'Autoload',
-      opts: {
-        // changer la logique
-        dir: `${dirname}/example/routes`,
-        options: Object.assign({})
-      },
-      after: {
-        /** plugins: {} **/
-      }
-    },
     {
       name: 'Autoload',
       opts: {
@@ -62,6 +54,8 @@ export default class EasyApi {
   // faire un test pour savoir si l'interface crash si tout les champs ne sont pas remplie afin d'assign config a this.config
   constructor(config: any) {
     //this.logger.info(this.availablePlugins);
+    const env = loggerConfig[config.env];
+    this._logger = pino(loggerConfig[config.env]);
   }
 
   public register() {
@@ -74,27 +68,13 @@ export default class EasyApi {
   }
 
   public async start(): Promise<void> {
-    if (this.debug) {
-      // give possibilite to give custom logger
-      this.app = Fastify({
-        logger: {
-          transport: {
-            target: 'pino-pretty',
-            options: {
-              translateTime: 'HH:MM:ss Z',
-              ignore: 'pid,hostname'
-            }
-          }
-        }
-      });
-    }
     try {
       await this.app.listen({
         port: this.port,
         host: this.isInContainer ? '0.0.0.0' : undefined
       });
     } catch (e) {
-      this.logger.error(e);
+      this._logger.error(e);
       process.exit();
     }
   }
@@ -102,10 +82,12 @@ export default class EasyApi {
   stop(): void {
     this.app.close().then(
       () => {
-        this.logger.info('successfully closed!');
+        this._logger.info('successfully closed!');
+        process.exit();
       },
       err => {
-        this.logger.error('an error happened', err);
+        this._logger.error('an error happened', err);
+        process.exit();
       }
     );
   }
