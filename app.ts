@@ -1,8 +1,12 @@
 import { defaultConfig, pluginConfig } from './libs/templates/default';
 import { IEasyApiConfig, IPlugin } from './libs/types/config';
 import Fastify, { FastifyInstance } from 'fastify';
-import pino from 'pino';
 import { IEvents } from './libs/types/events';
+import { fileURLToPath } from 'url';
+import PATH from 'path';
+import pino from 'pino';
+
+const dirname = PATH.dirname(__filename);
 
 enum AvailablePluginEnum {
   Sensible,
@@ -12,7 +16,7 @@ enum AvailablePluginEnum {
 }
 
 export default class EasyApi {
-  logger: any = pino({
+  readonly logger: any = pino({
     transport: {
       target: 'pino-pretty',
       options: {
@@ -21,18 +25,18 @@ export default class EasyApi {
     }
   });
   // Give possibilite to inject custom plugin in the futur
-  availablePlugins: (string | AvailablePluginEnum)[] = Object.values(
+  readonly availablePlugins: (string | AvailablePluginEnum)[] = Object.values(
     AvailablePluginEnum
   ).filter(key => typeof key === 'string');
-  availablePluginss = pluginConfig;
-  defaultPluginsConfig: Array<IPlugin> = [
+  readonly defaultPluginsConfig: Array<IPlugin> = [
     { name: 'Sensible' },
     { name: 'UnderPressure' },
     { name: 'Cors', origin: '*' },
     {
       name: 'Autoload',
       opts: {
-        dir: './example/routes',
+        // changer la logique
+        dir: `${dirname}/example/routes`,
         options: Object.assign({})
       },
       after: {
@@ -42,26 +46,25 @@ export default class EasyApi {
     {
       name: 'Autoload',
       opts: {
-        dir: './example/plugins',
+        dir: `${dirname}/../fastify/plugins`,
         options: Object.assign({})
       }
     }
   ];
-  port: number = 3001;
-  debug: boolean = true;
-  isInContainer: boolean = false;
-  app: FastifyInstance = Fastify();
-  config: IEasyApiConfig = defaultConfig;
+  private port: number = 3001;
+  private debug: boolean = true;
+  private isInContainer: boolean = false;
+  private app: FastifyInstance = Fastify();
+  private config: IEasyApiConfig = defaultConfig;
   // find a way to dispatch event
-  events: Array<IEvents> = [];
+  private events: Array<IEvents> = [];
 
   // faire un test pour savoir si l'interface crash si tout les champs ne sont pas remplie afin d'assign config a this.config
   constructor(config: any) {
-    this.logger.info(this.availablePlugins);
-    this.logger.info('pluginConfig');
+    //this.logger.info(this.availablePlugins);
   }
 
-  async register() {
+  public register() {
     this.defaultPluginsConfig.map((plugin: IPlugin) => {
       this.app.register(
         pluginConfig[plugin.name],
@@ -70,7 +73,7 @@ export default class EasyApi {
     });
   }
 
-  async start(): Promise<void> {
+  public async start(): Promise<void> {
     if (this.debug) {
       // give possibilite to give custom logger
       this.app = Fastify({
@@ -85,10 +88,15 @@ export default class EasyApi {
         }
       });
     }
-    await this.app.listen({
-      port: this.port,
-      host: this.isInContainer ? '0.0.0.0' : undefined
-    });
+    try {
+      await this.app.listen({
+        port: this.port,
+        host: this.isInContainer ? '0.0.0.0' : undefined
+      });
+    } catch (e) {
+      this.logger.error(e);
+      process.exit();
+    }
   }
 
   stop(): void {
@@ -102,7 +110,11 @@ export default class EasyApi {
     );
   }
 
-  addEvent(event: IEvents): boolean {
+  public addEvent(event: IEvents): boolean {
     return true;
+  }
+
+  public getServer(): FastifyInstance {
+    return this.app;
   }
 }
