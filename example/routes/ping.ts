@@ -5,8 +5,8 @@ export default async function userService(
   opts: FastifyServerOptions,
   done: any
 ) {
-  server.get('/ping', async (req, res) => {
-    res.send('pong').status(200);
-  });
+  //server.get('/ping', async (req, res) => {
+  //  res.send('pong').status(200);
+  //});
   done();
 }
