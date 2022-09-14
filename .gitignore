@@ -1,6 +1,9 @@
 node_modules/
 build/
 
-
+# ide
 .idea
 .vscode
+
+#other
+**/.DS_Store
