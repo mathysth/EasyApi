@@ -3,7 +3,7 @@ import {
   loggerConfig,
   pluginConfig
 } from './libs/templates/default';
-import { IEasyApiConfig, IPlugin } from './libs/types/config';
+import { IEasyApiConfig, ILogger, IPlugin } from './libs/types/config';
 import Fastify, { FastifyInstance } from 'fastify';
 import { IEvents } from './libs/types/events';
 import PATH from 'path';
@@ -38,7 +38,7 @@ export default class EasyApi {
     {
       name: 'Autoload',
       opts: {
-        dir: `${dirname}/../fastify/plugins`,
+        dir: `${dirname}/fastify/plugins`,
         options: Object.assign({})
       }
     }
@@ -53,9 +53,11 @@ export default class EasyApi {
 
   // faire un test pour savoir si l'interface crash si tout les champs ne sont pas remplie afin d'assign config a this.config
   constructor(config: any) {
-    //this.logger.info(this.availablePlugins);
-    const env = loggerConfig[config.env];
-    this._logger = pino(loggerConfig[config.env]);
+    //this.logger.info(dirname);
+    const env: ILogger = loggerConfig[config.env];
+    this._logger = pino(env);
+    //find a way to add pino config
+    //this.app = Fastify(env);
   }
 
   public register() {
