@@ -1,7 +1,8 @@
 import { defaultConfig } from './libs/templates/default';
 import EasyApiConfigSchema from './libs/types/config';
-import { fastify, FastifyInstance } from 'fastify';
+import Fastify, { FastifyInstance } from 'fastify';
 import pino from 'pino';
+import { EventsSchema } from './libs/types/events';
 
 export default class EasyApi {
   logger: any = pino({
@@ -28,10 +29,12 @@ export default class EasyApi {
     { name: 'Autoload', folder: 'plugins' }
   ];
   port: number = 3001;
+  debug: boolean = true;
   isInContainer: boolean = false;
-  app: FastifyInstance = fastify();
+  app: FastifyInstance = Fastify();
   config: EasyApiConfigSchema = defaultConfig;
-  events: Array<string> = [];
+  // find a way to dispatch event
+  events: Array<EventsSchema> = [];
   test: Object;
 
   // faire un test pour savoir si l'interface crash si tout les champs ne sont pas remplie afin d'assign config a this.config
@@ -41,14 +44,28 @@ export default class EasyApi {
 
   async register() {}
 
-  async start() {
+  async start(): Promise<void> {
+    if (this.debug) {
+      // give possibilite to give custom logger
+      this.app = Fastify({
+        logger: {
+          transport: {
+            target: 'pino-pretty',
+            options: {
+              translateTime: 'HH:MM:ss Z',
+              ignore: 'pid,hostname'
+            }
+          }
+        }
+      });
+    }
     await this.app.listen({
       port: this.port,
       host: this.isInContainer ? '0.0.0.0' : undefined
     });
   }
 
-  stop() {
+  stop(): void {
     this.app.close().then(
       () => {
         this.logger.info('successfully closed!');
@@ -59,7 +76,7 @@ export default class EasyApi {
     );
   }
 
-  setTests() {}
-
-  runTests() {}
+  addEvent(event: EventsSchema): boolean {
+    return true;
+  }
 }
