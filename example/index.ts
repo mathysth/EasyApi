@@ -14,7 +14,7 @@ const app: FastifyPluginCallback = (server, options, done) => {
 };
 
 server.register(app);
-//api.register();
+api.register();
 api.start().then(r => {
   api.logger.info('api started');
 });

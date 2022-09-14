@@ -12,3 +12,18 @@ interface IPluginAfter {
   // Change to fastify plugin type
   plugin?: Function;
 }
+
+interface ILogger {
+  transport?: ILoggerTransport;
+}
+
+interface ILoggerTransport {
+  target: string;
+  options?: ILoggerTransportOptions;
+}
+
+interface ILoggerTransportOptions {
+  translateTime?: string;
+  ignore?: string;
+  colorize?: boolean;
+}
