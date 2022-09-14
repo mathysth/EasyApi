@@ -5,20 +5,6 @@ import FastifyAutoload from '@fastify/autoload';
 import FastifySensible from '@fastify/sensible';
 
 export const defaultConfig: IEasyApiConfig = {
-  logger: {
-    enable: false,
-    config: {
-      info: 'info',
-      prettyPrint:
-        process.env.ENVIRONMENT === 'dev'
-          ? {
-              translateTime: 'HH:MM:ss Z',
-              ignore: 'pid,hostname',
-              colorize: true
-            }
-          : false
-    }
-  },
   db: {
     server: {},
     connexionString: '',
