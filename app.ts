@@ -45,15 +45,18 @@ export default class EasyApi {
   private events: Array<IEvents> = [];
 
   // faire un test pour savoir si l'interface crash si tout les champs ne sont pas remplie afin d'assign config a this.config
+
   constructor(config: any) {
     //this.logger.info(dirname);
     const env: ILogger = loggerConfig[config.env];
     this._port = config.port ? config.port : this.port;
     this._logger = pino(env);
-    //find a way to add pino config
-    //this.app = Fastify(env);
+    this.app = Fastify({ logger: env });
   }
 
+  /**
+   * We're looping through the default plugins config and registering each plugin with the server
+   */
   public register() {
     this.defaultPluginsConfig.map((plugin: IPlugin) => {
       this.app.register(
@@ -63,6 +66,9 @@ export default class EasyApi {
     });
   }
 
+  /**
+   * The function starts the server by listening on the port specified in the `.env` file
+   */
   public async start(): Promise<void> {
     try {
       await this.app.listen({
@@ -75,6 +81,9 @@ export default class EasyApi {
     }
   }
 
+  /**
+   * The stop function closes the app and then exits the process
+   */
   stop(): void {
     this.app.close().then(
       () => {
