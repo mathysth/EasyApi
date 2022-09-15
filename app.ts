@@ -3,7 +3,12 @@ import {
   loggerConfig,
   pluginConfig
 } from './libs/templates/default';
-import { IEasyApiConfig, ILogger, IPlugin } from './libs/types/config';
+import {
+  IEasyApiConfig,
+  IEasyApiConstructor,
+  ILogger,
+  IPlugin
+} from './libs/types/config';
 import Fastify, { FastifyInstance } from 'fastify';
 import { IEvents } from './libs/types/events';
 import PATH from 'path';
@@ -45,9 +50,7 @@ export default class EasyApi {
   private events: Array<IEvents> = [];
 
   // faire un test pour savoir si l'interface crash si tout les champs ne sont pas remplie afin d'assign config a this.config
-
-  constructor(config: any) {
-    //this.logger.info(dirname);
+  constructor(config: IEasyApiConstructor) {
     const env: ILogger = loggerConfig[config.env];
     this._port = config.port ? config.port : this.port;
     this._logger = pino(env);
