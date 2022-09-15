@@ -1,12 +1,11 @@
 import fp from 'fastify-plugin';
 import Swagger, { SwaggerOptions } from '@fastify/swagger';
-import {
-  FastifyInstance,
-  FastifyServerOptions,
-} from "fastify";
+import { FastifyInstance, FastifyServerOptions } from 'fastify';
 
-async function swaggerGenerator(fastify: FastifyInstance, opts: FastifyServerOptions) {
-
+async function swaggerGenerator(
+  fastify: FastifyInstance,
+  opts: FastifyServerOptions
+) {
   // Swagger documentation generator for Fastify.
   // It uses the schemas you declare in your routes to generate a swagger compliant doc.
   // https://github.com/fastify/fastify-swagger
@@ -16,7 +15,7 @@ async function swaggerGenerator(fastify: FastifyInstance, opts: FastifyServerOpt
       info: {
         title: 'Fastify URL Shortener',
         description: 'Fastify URL Shortener documentation',
-        version:  "1.0",
+        version: '1.0'
       },
       externalDocs: {
         url: 'https://github.com/delvedor/fastify-example',
@@ -44,7 +43,6 @@ async function swaggerGenerator(fastify: FastifyInstance, opts: FastifyServerOpt
     // but it's alwaysx better to start safe.
     exposeRoute: process.env.NODE_ENV !== 'production'
   });
-
 }
 
 export default fp(swaggerGenerator, {

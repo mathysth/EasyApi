@@ -19,13 +19,6 @@ enum AvailablePluginEnum {
 }
 
 export default class EasyApi {
-  get logger(): any {
-    return this._logger;
-  }
-
-  set logger(value: any) {
-    this._logger = value;
-  }
   private _logger: any;
   // Give possibilite to inject custom plugin in the futur
   readonly availablePlugins: (string | AvailablePluginEnum)[] = Object.values(
@@ -38,13 +31,13 @@ export default class EasyApi {
     {
       name: 'Autoload',
       opts: {
-        dir: `${dirname}/fastify/plugins`,
+        dir: `${dirname}/plugins`,
         options: Object.assign({})
       }
     }
   ];
-  private port: number = 3001;
-  private debug: boolean = true;
+  private _port: number = 3001;
+  private _debug: boolean = true;
   private isInContainer: boolean = false;
   private app: FastifyInstance = Fastify();
   private config: IEasyApiConfig = defaultConfig;
@@ -55,6 +48,7 @@ export default class EasyApi {
   constructor(config: any) {
     //this.logger.info(dirname);
     const env: ILogger = loggerConfig[config.env];
+    this._port = config.port ? config.port : this.port;
     this._logger = pino(env);
     //find a way to add pino config
     //this.app = Fastify(env);
@@ -72,11 +66,11 @@ export default class EasyApi {
   public async start(): Promise<void> {
     try {
       await this.app.listen({
-        port: this.port,
-        host: this.isInContainer ? '0.0.0.0' : undefined
+        port: this._port,
+        host: this.isInContainer ? '0.0.0.0' : ''
       });
     } catch (e) {
-      this._logger.error(e);
+      this.logger.error(e);
       process.exit();
     }
   }
@@ -84,11 +78,11 @@ export default class EasyApi {
   stop(): void {
     this.app.close().then(
       () => {
-        this._logger.info('successfully closed!');
+        this.logger.info('successfully closed!');
         process.exit();
       },
       err => {
-        this._logger.error('an error happened', err);
+        this.logger.error('an error happened', err);
         process.exit();
       }
     );
@@ -100,5 +94,28 @@ export default class EasyApi {
 
   public getServer(): FastifyInstance {
     return this.app;
+  }
+
+  get port(): number {
+    return this._port;
+  }
+
+  set port(value: number) {
+    this._port = value;
+  }
+
+  get debug(): boolean {
+    return this._debug;
+  }
+
+  set debug(value: boolean) {
+    this._debug = value;
+  }
+  get logger(): any {
+    return this._logger;
+  }
+
+  set logger(value: any) {
+    this._logger = value;
   }
 }
