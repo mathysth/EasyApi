@@ -67,6 +67,7 @@ export default class EasyApi {
         plugin.opts ? plugin.opts : {}
       );
     });
+    this.events.eventEmitter.emit('defaultPluginRegistered');
   }
 
   /**
@@ -78,6 +79,7 @@ export default class EasyApi {
         port: this._port,
         host: this.isInContainer ? '0.0.0.0' : ''
       });
+      this.events.eventEmitter.emit('start');
     } catch (e) {
       this.logger.error(e);
       process.exit();
