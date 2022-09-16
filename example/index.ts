@@ -4,6 +4,18 @@ import { FastifyPluginCallback } from 'fastify';
 const api: EasyApi = new EasyApi({ env: 'development' });
 const server = api.getServer();
 
+// Creating custom event
+// If added before: api.events.loadEvents() the event will automatically inject
+// Else you should call addListener() function from api.events
+api.events.addEvent({
+  name: 'hello',
+  log: true,
+  cb: () => {
+    api.logger.info('Hello');
+  }
+});
+
+// Custom route using Fastify
 const app: FastifyPluginCallback = (server, options, done) => {
   api.logger.info('Route loaded');
 
@@ -13,9 +25,16 @@ const app: FastifyPluginCallback = (server, options, done) => {
   done();
 };
 
+// Register route using fastify register
 server.register(app);
+// Register default fastify plugin from api
 api.register();
+
+//Start api
 api.start().then(r => {
   api.logger.info('api started');
+  // Load events
+  api.events.loadEvents();
+  // Call native event from api
   api.events.eventEmitter.emit('start');
 });
