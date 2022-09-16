@@ -44,6 +44,21 @@ export class Events {
   }
 
   /**
+   * It removes a listener from the event emitter
+   * @param {string} eventName - The name of the event to listen for.
+   */
+  public removeListener(eventName: string) {
+    try {
+      this._eventEmitter.removeListener(eventName, () => {
+        this.app.logger.info(`removing "${eventName}" listener`);
+      });
+    } catch (e) {
+      this.app.logger.error('An error happened');
+      this.app.logger.error(e);
+    }
+  }
+
+  /**
    * The addEvent function takes an event object as a parameter and adds it to the events array
    * @param {IEvents} event - IEvents - This is the event that we want to add to the array.
    */
