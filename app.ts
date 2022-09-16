@@ -10,9 +10,9 @@ import {
   IPlugin
 } from './libs/types/config';
 import Fastify, { FastifyInstance } from 'fastify';
-import { IEvents } from './libs/types/events';
 import PATH from 'path';
 import pino from 'pino';
+import { Events } from './libs/events/events';
 
 const dirname = PATH.dirname(__filename);
 
@@ -43,16 +43,16 @@ export default class EasyApi {
   ];
   private _port: number = 3001;
   private _debug: boolean = true;
-  private isInContainer: boolean = false;
-  private app: FastifyInstance = Fastify();
+  private readonly isInContainer: boolean = false;
+  private readonly app: FastifyInstance = Fastify();
   private config: IEasyApiConfig = defaultConfig;
-  // find a way to dispatch event
-  private events: Array<IEvents> = [];
+  private _events: Events = new Events(this);
 
   // faire un test pour savoir si l'interface crash si tout les champs ne sont pas remplie afin d'assign config a this.config
   constructor(config: IEasyApiConstructor) {
     const env: ILogger = loggerConfig[config.env];
     this._port = config.port ? config.port : this.port;
+    this.isInContainer = !!config.isInContainer;
     this._logger = pino(env);
     this.app = Fastify({ logger: env });
   }
@@ -100,10 +100,6 @@ export default class EasyApi {
     );
   }
 
-  public addEvent(event: IEvents): boolean {
-    return true;
-  }
-
   public getServer(): FastifyInstance {
     return this.app;
   }
@@ -123,11 +119,16 @@ export default class EasyApi {
   set debug(value: boolean) {
     this._debug = value;
   }
+
   get logger(): any {
     return this._logger;
   }
 
   set logger(value: any) {
     this._logger = value;
+  }
+
+  get events(): Events {
+    return this._events;
   }
 }

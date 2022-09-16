@@ -17,4 +17,5 @@ server.register(app);
 api.register();
 api.start().then(r => {
   api.logger.info('api started');
+  api.events.eventEmitter.emit('start');
 });

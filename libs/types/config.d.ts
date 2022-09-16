@@ -31,4 +31,5 @@ interface ILoggerTransportOptions {
 export interface IEasyApiConstructor {
   env: string;
   port?: number;
+  isInContainer?: boolean;
 }
