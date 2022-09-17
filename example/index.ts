@@ -3,8 +3,9 @@ import { FastifyPluginCallback } from 'fastify';
 
 const api: EasyApi = new EasyApi({ env: 'development' });
 const server = api.getServer();
+
 // Creating custom event
-// If added before: api.events.loadEvents() the event will automatically inject
+// If added before: api.events.loadEvents() the event will automatically be injected
 // Else you should call addListener() function from api.events
 api.events.addEvent({
   name: 'hello',
@@ -39,4 +40,16 @@ api.start().then(r => {
   api.events.eventEmitter.emit('start');
   api.events.eventEmitter.emit('defaultPluginRegistered');
   api.events.eventEmitter.emit('hello');
+
+  // Add event after original event were loaded
+  api.events.addListener({
+    name: 'afterLoad',
+    log: false,
+    cb: () => {
+      api.logger.info('Event after loadEvent');
+    }
+  });
+
+  // Call event from api
+  api.events.eventEmitter.emit('afterLoad');
 });
