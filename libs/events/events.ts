@@ -6,7 +6,13 @@ export class Events {
   private app: EasyApi;
   private _eventEmitter: EventEmitter = new EventEmitter();
   private _events: Array<IEvents> = [
-    { name: 'start', log: true, cb: () => {} },
+    {
+      name: 'start',
+      log: true,
+      cb: () => {
+        this.app.logger.info('Event start triggered');
+      }
+    },
     { name: 'defaultPluginRegistered', log: true, cb: () => {} }
   ];
 
@@ -20,12 +26,7 @@ export class Events {
    */
   public loadEvents() {
     this.events.map(event => {
-      this._eventEmitter.on(event.name, () => {
-        event.log
-          ? this.app.logger.info(`${event.name} events loaded`)
-          : undefined;
-        event.cb();
-      });
+      this.on(event);
     });
   }
 
@@ -35,6 +36,10 @@ export class Events {
    * @param {IEvents} event - IEvents - this is the interface that we created earlier.
    */
   public addListener(event: IEvents): void {
+    this.on(event);
+  }
+
+  private on(event: IEvents) {
     this._eventEmitter.on(event.name, () => {
       event.log
         ? this.app.logger.info(`${event.name} events loaded`)
@@ -47,11 +52,12 @@ export class Events {
    * It removes a listener from the event emitter
    * @param {string} eventName - The name of the event to listen for.
    */
-  public removeListener(eventName: string) {
+  public removeEvent(eventName: string) {
     try {
       this._eventEmitter.removeListener(eventName, () => {
         this.app.logger.info(`removing "${eventName}" listener`);
       });
+      //const test: IEvents | undefined = this._events.find(event => event.name === eventName);
     } catch (e) {
       this.app.logger.error('An error happened');
       this.app.logger.error(e);
