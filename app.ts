@@ -43,7 +43,7 @@ export default class EasyApi {
   ];
   private _port: number = 3001;
   private _debug: boolean = true;
-  private readonly isInContainer: boolean = false;
+  private readonly _isInContainer: boolean = false;
   private readonly app: FastifyInstance = Fastify();
   private config: IEasyApiConfig = defaultConfig;
   private _events: Events = new Events(this);
@@ -52,7 +52,7 @@ export default class EasyApi {
   constructor(config: IEasyApiConstructor) {
     const env: ILogger = loggerConfig[config.env];
     this._port = config.port ? config.port : this.port;
-    this.isInContainer = !!config.isInContainer;
+    this._isInContainer = !!config.isInContainer;
     this._logger = pino(env);
     this.app = Fastify({ logger: env });
   }
@@ -77,7 +77,7 @@ export default class EasyApi {
     try {
       await this.app.listen({
         port: this._port,
-        host: this.isInContainer ? '0.0.0.0' : ''
+        host: this._isInContainer ? '0.0.0.0' : ''
       });
       this.events.eventEmitter.emit('start');
     } catch (e) {
@@ -132,5 +132,9 @@ export default class EasyApi {
 
   get events(): Events {
     return this._events;
+  }
+
+  get isInContainer(): boolean {
+    return this._isInContainer;
   }
 }
