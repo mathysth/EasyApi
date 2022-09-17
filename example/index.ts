@@ -3,15 +3,14 @@ import { FastifyPluginCallback } from 'fastify';
 
 const api: EasyApi = new EasyApi({ env: 'development' });
 const server = api.getServer();
-
 // Creating custom event
 // If added before: api.events.loadEvents() the event will automatically inject
 // Else you should call addListener() function from api.events
 api.events.addEvent({
   name: 'hello',
-  log: true,
+  log: false,
   cb: () => {
-    api.logger.info('Hello');
+    api.logger.info('Hello world');
   }
 });
 
@@ -35,6 +34,9 @@ api.start().then(r => {
   api.logger.info('api started');
   // Load events
   api.events.loadEvents();
-  // Call native event from api
+
+  // Call event from api
   api.events.eventEmitter.emit('start');
+  api.events.eventEmitter.emit('defaultPluginRegistered');
+  api.events.eventEmitter.emit('hello');
 });
