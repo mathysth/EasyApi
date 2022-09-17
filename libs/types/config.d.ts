@@ -8,12 +8,12 @@ export interface IPlugin {
   after?: PluginAfterInterface;
 }
 
-interface IPluginAfter {
+export interface IPluginAfter {
   // Change to fastify plugin type
   plugin?: Function;
 }
 
-interface ILogger {
+export interface ILogger {
   transport?: ILoggerTransport;
 }
 
@@ -26,4 +26,10 @@ interface ILoggerTransportOptions {
   translateTime?: string;
   ignore?: string;
   colorize?: boolean;
+}
+
+export interface IEasyApiConstructor {
+  env: string;
+  port?: number;
+  isInContainer?: boolean;
 }

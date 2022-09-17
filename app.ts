@@ -3,11 +3,16 @@ import {
   loggerConfig,
   pluginConfig
 } from './libs/templates/default';
-import { IEasyApiConfig, ILogger, IPlugin } from './libs/types/config';
+import {
+  IEasyApiConfig,
+  IEasyApiConstructor,
+  ILogger,
+  IPlugin
+} from './libs/types/config';
 import Fastify, { FastifyInstance } from 'fastify';
-import { IEvents } from './libs/types/events';
 import PATH from 'path';
 import pino from 'pino';
+import { Events } from './libs/events/events';
 
 const dirname = PATH.dirname(__filename);
 
@@ -19,13 +24,6 @@ enum AvailablePluginEnum {
 }
 
 export default class EasyApi {
-  get logger(): any {
-    return this._logger;
-  }
-
-  set logger(value: any) {
-    this._logger = value;
-  }
   private _logger: any;
   // Give possibilite to inject custom plugin in the futur
   readonly availablePlugins: (string | AvailablePluginEnum)[] = Object.values(
@@ -38,28 +36,30 @@ export default class EasyApi {
     {
       name: 'Autoload',
       opts: {
-        dir: `${dirname}/fastify/plugins`,
+        dir: `${dirname}/plugins`,
         options: Object.assign({})
       }
     }
   ];
-  private port: number = 3001;
-  private debug: boolean = true;
-  private isInContainer: boolean = false;
-  private app: FastifyInstance = Fastify();
+  private _port: number = 3001;
+  private _debug: boolean = true;
+  private readonly isInContainer: boolean = false;
+  private readonly app: FastifyInstance = Fastify();
   private config: IEasyApiConfig = defaultConfig;
-  // find a way to dispatch event
-  private events: Array<IEvents> = [];
+  private _events: Events = new Events(this);
 
   // faire un test pour savoir si l'interface crash si tout les champs ne sont pas remplie afin d'assign config a this.config
-  constructor(config: any) {
-    //this.logger.info(dirname);
+  constructor(config: IEasyApiConstructor) {
     const env: ILogger = loggerConfig[config.env];
+    this._port = config.port ? config.port : this.port;
+    this.isInContainer = !!config.isInContainer;
     this._logger = pino(env);
-    //find a way to add pino config
-    //this.app = Fastify(env);
+    this.app = Fastify({ logger: env });
   }
 
+  /**
+   * We're looping through the default plugins config and registering each plugin with the server
+   */
   public register() {
     this.defaultPluginsConfig.map((plugin: IPlugin) => {
       this.app.register(
@@ -67,38 +67,70 @@ export default class EasyApi {
         plugin.opts ? plugin.opts : {}
       );
     });
+    this.events.eventEmitter.emit('defaultPluginRegistered');
   }
 
+  /**
+   * The function starts the server by listening on the port specified in the `.env` file
+   */
   public async start(): Promise<void> {
     try {
       await this.app.listen({
-        port: this.port,
-        host: this.isInContainer ? '0.0.0.0' : undefined
+        port: this._port,
+        host: this.isInContainer ? '0.0.0.0' : ''
       });
+      this.events.eventEmitter.emit('start');
     } catch (e) {
-      this._logger.error(e);
+      this.logger.error(e);
       process.exit();
     }
   }
 
+  /**
+   * The stop function closes the app and then exits the process
+   */
   stop(): void {
     this.app.close().then(
       () => {
-        this._logger.info('successfully closed!');
+        this.logger.info('successfully closed!');
         process.exit();
       },
       err => {
-        this._logger.error('an error happened', err);
+        this.logger.error('an error happened', err);
         process.exit();
       }
     );
   }
 
-  public addEvent(event: IEvents): boolean {
-    return true;
-  }
-
   public getServer(): FastifyInstance {
     return this.app;
+  }
+
+  get port(): number {
+    return this._port;
+  }
+
+  set port(value: number) {
+    this._port = value;
+  }
+
+  get debug(): boolean {
+    return this._debug;
+  }
+
+  set debug(value: boolean) {
+    this._debug = value;
+  }
+
+  get logger(): any {
+    return this._logger;
+  }
+
+  set logger(value: any) {
+    this._logger = value;
+  }
+
+  get events(): Events {
+    return this._events;
   }
 }
