@@ -35,21 +35,19 @@ api.start().then(r => {
   api.logger.info('api started');
   // Load events
   api.events.loadEvents();
-
   // Call event from api
   api.events.eventEmitter.emit('start');
   api.events.eventEmitter.emit('defaultPluginRegistered');
   api.events.eventEmitter.emit('hello');
-
   // Add event after original event were loaded
   api.events.addListener({
     name: 'afterLoad',
     log: false,
-    cb: () => {
+    cb: (data: any) => {
       api.logger.info('Event after loadEvent');
+      api.logger.info(data);
     }
   });
-
   // Call event from api
-  api.events.eventEmitter.emit('afterLoad');
+  api.events.eventEmitter.emit('afterLoad', { data: 'object to transfer' });
 });
