@@ -3,12 +3,7 @@ import {
   loggerConfig,
   pluginConfig
 } from './libs/templates/default';
-import {
-  IEasyApiConfig,
-  IEasyApiConstructor,
-  ILogger,
-  IPlugin
-} from './libs/types/config';
+import { IEasyApiConstructor, ILogger, IPlugin } from './libs/types/config';
 import Fastify, { FastifyInstance } from 'fastify';
 import PATH from 'path';
 import pino from 'pino';
@@ -31,8 +26,8 @@ export default class EasyApi {
   ).filter(key => typeof key === 'string');
   readonly defaultPluginsConfig: Array<IPlugin> = [
     { name: 'Sensible' },
-    { name: 'UnderPressure' },
-    { name: 'Cors', origin: '*' },
+    { name: 'UnderPressure', opts: defaultConfig['underPressure'] },
+    { name: 'Cors', opts: defaultConfig['cors'] },
     {
       name: 'Autoload',
       opts: {
@@ -45,7 +40,6 @@ export default class EasyApi {
   private _debug: boolean = true;
   private readonly _isInContainer: boolean = false;
   private readonly app: FastifyInstance = Fastify();
-  private config: IEasyApiConfig = defaultConfig;
   private _events: Events = new Events(this);
 
   // faire un test pour savoir si l'interface crash si tout les champs ne sont pas remplie afin d'assign config a this.config
