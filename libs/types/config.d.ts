@@ -1,11 +1,9 @@
-export interface IEasyApiConfig {}
-
 export interface IPlugin {
   name: string;
   origin?: string;
   opts?: Object;
   folder?: string;
-  after?: PluginAfterInterface;
+  after?: IPluginAfter;
 }
 
 export interface IPluginAfter {
@@ -32,4 +30,5 @@ export interface IEasyApiConstructor {
   env: string;
   port?: number;
   isInContainer?: boolean;
+  auth?: string;
 }
