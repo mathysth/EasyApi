@@ -1,26 +1,13 @@
-import { IEasyApiConfig } from '../types/config';
 import FastyifyCors from '@fastify/cors';
 import FastifyUnderPressure from '@fastify/under-pressure';
 import FastifyAutoload from '@fastify/autoload';
 import FastifySensible from '@fastify/sensible';
 
-export const defaultConfig: IEasyApiConfig = {
+export const defaultConfig: { [index: string]: any } = {
   db: {
     server: {},
     connexionString: '',
     availableSGBD: ['POSTGRESQL', 'MONGO', 'SQL']
-  },
-  routing: {
-    //if true return object for every request even if the route doesn't exist
-    alternativeRouting: true,
-    routes: [
-      {
-        path: '/ping',
-        action: () => {
-          return 'pong';
-        }
-      }
-    ]
   },
   authentication: {
     enable: false,
@@ -40,18 +27,6 @@ export const defaultConfig: IEasyApiConfig = {
   },
   cors: {
     origin: '*'
-  },
-  events: {
-    OnStart: () => {},
-    OnRequest: () => {},
-    OnClose: () => {},
-    //Setup a system where log will be log online onClose event or with a cron
-    dispatch: () => {},
-    getDispatched: () => {},
-    // Can be use if wanted will clear a specific event
-    clearEvent: (eventId: string) => {
-      return eventId;
-    }
   }
 };
 
