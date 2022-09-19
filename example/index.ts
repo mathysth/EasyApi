@@ -1,7 +1,10 @@
 import EasyApi from '../app';
 import { FastifyPluginCallback } from 'fastify';
 
-const api: EasyApi = new EasyApi({ env: 'development' });
+const api: EasyApi = new EasyApi({
+  env: 'development',
+  auth: { secret: 'bonjour', opts: { maxAge: '3 days' } }
+});
 const server = api.getServer();
 
 // Creating custom event
