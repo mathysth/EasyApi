@@ -4,7 +4,11 @@ import {
   pluginConfig
 } from './libs/templates/default';
 import { IEasyApiConstructor, ILogger, IPlugin } from './libs/types/config';
-import Fastify, { FastifyInstance } from 'fastify';
+import Fastify, {
+  FastifyInstance,
+  FastifyReply,
+  FastifyRequest
+} from 'fastify';
 import PATH from 'path';
 import pino from 'pino';
 import { Events } from './libs/events/events';
@@ -28,6 +32,8 @@ export default class EasyApi {
     { name: 'Sensible' },
     { name: 'UnderPressure', opts: defaultConfig['underPressure'] },
     { name: 'Cors', opts: defaultConfig['cors'] },
+    { name: 'Swagger', opts: defaultConfig['swagger'] }
+    /*
     {
       name: 'Autoload',
       opts: {
@@ -35,13 +41,13 @@ export default class EasyApi {
         options: Object.assign({})
       }
     }
+    */
   ];
   private _port: number = 3001;
   private _debug: boolean = true;
   private readonly _isInContainer: boolean = false;
   private readonly app: FastifyInstance = Fastify();
   private _events: Events = new Events(this);
-
   // faire un test pour savoir si l'interface crash si tout les champs ne sont pas remplie afin d'assign config a this.config
   constructor(config: IEasyApiConstructor) {
     const env: ILogger = loggerConfig[config.env];
@@ -49,6 +55,35 @@ export default class EasyApi {
     this._isInContainer = !!config.isInContainer;
     this._logger = pino(env);
     this.app = Fastify({ logger: env });
+    this.registerChoices(config);
+  }
+
+  /**
+   * It takes the config object passed to the constructor and checks if the auth property is set. If it is, it pushes a new
+   * object to the defaultPluginsConfig array
+   * @param {IEasyApiConstructor} config - IEasyApiConstructor
+   */
+  private registerChoices(config: IEasyApiConstructor) {
+    if (config.auth) {
+      this.defaultPluginsConfig.push({
+        name: 'Jwt',
+        opts: { ...defaultConfig['jwt'], secret: config.auth.secret },
+        after: () => {
+          this.app.decorate(
+            'authenticate',
+            async (request: FastifyRequest, reply: FastifyReply) => {
+              try {
+                await request.jwtVerify(
+                  config.auth?.opts ? config.auth.opts : {}
+                );
+              } catch (err) {
+                reply.send(err);
+              }
+            }
+          );
+        }
+      });
+    }
   }
 
   /**
@@ -56,10 +91,13 @@ export default class EasyApi {
    */
   public register() {
     this.defaultPluginsConfig.map((plugin: IPlugin) => {
-      this.app.register(
-        pluginConfig[plugin.name],
-        plugin.opts ? plugin.opts : {}
-      );
+      this.app
+        .register(pluginConfig[plugin.name], plugin.opts ? plugin.opts : {})
+        .after(() => {
+          if (typeof plugin?.after === 'function') {
+            plugin.after();
+          }
+        });
     });
     this.events.eventEmitter.emit('defaultPluginRegistered');
   }
