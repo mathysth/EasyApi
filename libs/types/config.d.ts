@@ -3,12 +3,7 @@ export interface IPlugin {
   origin?: string;
   opts?: Object;
   folder?: string;
-  after?: IPluginAfter;
-}
-
-export interface IPluginAfter {
-  // Change to fastify plugin type
-  plugin?: Function;
+  after?: Function;
 }
 
 export interface ILogger {
@@ -30,5 +25,10 @@ export interface IEasyApiConstructor {
   env: string;
   port?: number;
   isInContainer?: boolean;
-  auth?: string;
+  auth?: IEasyApiConstructorAuth;
+}
+
+interface IEasyApiConstructorAuth {
+  secret: string;
+  opts?: Object;
 }
