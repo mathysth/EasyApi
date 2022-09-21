@@ -1,5 +1,6 @@
 export interface IPlugin {
   name: string;
+  plugin?: any;
   origin?: string;
   opts?: Object;
   folder?: string;
@@ -26,6 +27,7 @@ export interface IEasyApiConstructor {
   port?: number;
   isInContainer?: boolean;
   auth?: IEasyApiConstructorAuth;
+  defaultPlugin?: boolean;
 }
 
 interface IEasyApiConstructorAuth {
