@@ -5,15 +5,14 @@ import { IEvents } from '../types/events';
 export class Events {
   private app: EasyApi;
   private _eventEmitter: EventEmitter = new EventEmitter();
+  //todo add getter / setter
   private _events: Set<IEvents> = new Set<IEvents>([
     {
       name: 'start',
-      log: true,
-      cb: () => {
-        this.app.logger.info('Event start triggered');
+      cb: (data: any) => {
+        this.app.logger.info('Api loaded');
       }
-    },
-    { name: 'defaultPluginRegistered', log: true, cb: () => {} }
+    }
   ]);
 
   constructor(app: EasyApi) {
@@ -41,12 +40,7 @@ export class Events {
   }
 
   private on(event: IEvents) {
-    this._eventEmitter.on(event.name, (data: any) => {
-      event.log
-        ? this.app.logger.info(`${event.name} events loaded`)
-        : undefined;
-      event.cb(data);
-    });
+    this._eventEmitter.on(event.name, event.cb);
   }
 
   /**
@@ -54,13 +48,9 @@ export class Events {
    * @param {string} eventName - The name of the event to listen for.
    */
   public off(eventName: string) {
-    try {
-      this._eventEmitter.off(eventName, () => {
-        this.app.logger.info(`removing "${eventName}" listener`);
-      });
-    } catch (e) {
-      this.app.logger.error('An error happened');
-      this.app.logger.error(e);
+    const event = this.getEventByName(eventName);
+    if (typeof event === 'object') {
+      this._eventEmitter.removeListener(eventName, () => event.cb);
     }
   }
 
