@@ -587,6 +587,13 @@ fastify-plugin@^4.0.0, fastify-plugin@^4.2.1:
   resolved "https://registry.yarnpkg.com/fastify-plugin/-/fastify-plugin-4.2.1.tgz#4b80020957938dbc44b8ad4a898fd8bcfbab3f65"
   integrity sha512-dlGKiwLzRBKkEf5J5ho0uAD/Jdv8GQVUbriB3tAX3ehRUXE4gTV3lRd5inEg9li1aLzb0EGj8y2K4/8g1TN06g==
 
+fastify-recaptcha@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/fastify-recaptcha/-/fastify-recaptcha-1.0.0.tgz#87d6fea7d889eadd0b36b6092c5fa60d5437e98f"
+  integrity sha512-2v9seHbcoazLItnH7QdQ3UKspxCULNy+AOzuy9/ybnJUX7T3PdhWV4u1VcW+77n6f3Q0vd5ejs89oLf66rzUeg==
+  dependencies:
+    fastify-plugin "^3.0.0"
+
 fastify@^4.5.3:
   version "4.5.3"
   resolved "https://registry.yarnpkg.com/fastify/-/fastify-4.5.3.tgz#df4f00347f06e8f3d6ab35788d2d140668c2533c"
