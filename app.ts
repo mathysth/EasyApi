@@ -13,35 +13,14 @@ import PATH from 'path';
 import pino from 'pino';
 import { Events } from './libs/events/events';
 
-const dirname = PATH.dirname(__filename);
-
-enum AvailablePluginEnum {
-  Sensible,
-  UnderPressure,
-  Cors,
-  Autoload
-}
-
 export default class EasyApi {
   private _logger: any;
-  // Give possibilite to inject custom plugin in the futur
-  readonly availablePlugins: (string | AvailablePluginEnum)[] = Object.values(
-    AvailablePluginEnum
-  ).filter(key => typeof key === 'string');
-  readonly defaultPluginsConfig: Array<IPlugin> = [
+  public readonly plugins = pluginConfig;
+  private _pluginsConfig: Array<IPlugin> = [
     { name: 'Sensible' },
-    { name: 'UnderPressure', opts: defaultConfig['underPressure'] },
-    { name: 'Cors', opts: defaultConfig['cors'] },
-    { name: 'Swagger', opts: defaultConfig['swagger'] }
-    /*
-    {
-      name: 'Autoload',
-      opts: {
-        dir: `${dirname}/plugins`,
-        options: Object.assign({})
-      }
-    }
-    */
+    { name: 'UnderPressure', opts: this.plugins['underPressure'] },
+    { name: 'Cors', opts: this.plugins['cors'] },
+    { name: 'Swagger', opts: this.plugins['swagger'] }
   ];
   private _port: number = 3001;
   private _debug: boolean = true;
@@ -64,8 +43,11 @@ export default class EasyApi {
    * @param {IEasyApiConstructor} config - IEasyApiConstructor
    */
   private registerChoices(config: IEasyApiConstructor) {
+    if (config.defaultPlugin) {
+      this.register();
+    }
     if (config.auth) {
-      this.defaultPluginsConfig.push({
+      this._pluginsConfig.push({
         name: 'Jwt',
         opts: { ...defaultConfig['jwt'], secret: config.auth.secret },
         after: () => {
@@ -89,17 +71,33 @@ export default class EasyApi {
   /**
    * We're looping through the default plugins config and registering each plugin with the server
    */
-  public register() {
-    this.defaultPluginsConfig.map((plugin: IPlugin) => {
-      this.app
-        .register(pluginConfig[plugin.name], plugin.opts ? plugin.opts : {})
-        .after(() => {
-          if (typeof plugin?.after === 'function') {
-            plugin.after();
-          }
-        });
-    });
-    this.events.eventEmitter.emit('defaultPluginRegistered');
+  public register(plugin?: IPlugin) {
+    if (plugin) {
+      this.registerCustomPlugin(plugin);
+    } else {
+      this._pluginsConfig.map((plugin: IPlugin) => {
+        this.app
+          .register(this.plugins[plugin.name], plugin.opts ? plugin.opts : {})
+          .after(() => {
+            if (typeof plugin?.after === 'function') {
+              plugin.after();
+            }
+          });
+      });
+    }
+  }
+
+  private registerCustomPlugin(customPlugin: IPlugin) {
+    try {
+      let plugin = customPlugin.plugin;
+      if (this.plugins[customPlugin.name]) {
+        plugin = this.plugins[customPlugin.name];
+      }
+      this.app.register(plugin, customPlugin.opts ? customPlugin.opts : {});
+      this._pluginsConfig.push(customPlugin);
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 
   /**
@@ -168,5 +166,9 @@ export default class EasyApi {
 
   get isInContainer(): boolean {
     return this._isInContainer;
+  }
+
+  get pluginsConfig(): Array<IPlugin> {
+    return this._pluginsConfig;
   }
 }
