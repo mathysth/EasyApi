@@ -5,10 +5,15 @@ import { IEvents } from '../types/events';
 export class Events {
   private app: EasyApi;
   private _eventEmitter: EventEmitter = new EventEmitter();
-  private _events: Array<IEvents> = [
-    { name: 'start', log: true, cb: () => {} },
-    { name: 'defaultPluginRegistered', log: true, cb: () => {} }
-  ];
+  //todo add getter / setter
+  private _events: Set<IEvents> = new Set<IEvents>([
+    {
+      name: 'start',
+      cb: (data: any) => {
+        this.app.logger.info('Api loaded');
+      }
+    }
+  ]);
 
   constructor(app: EasyApi) {
     this.app = app;
@@ -19,13 +24,8 @@ export class Events {
    * an event listener to the event emitter for each object
    */
   public loadEvents() {
-    this.events.map(event => {
-      this._eventEmitter.on(event.name, () => {
-        event.log
-          ? this.app.logger.info(`${event.name} events loaded`)
-          : undefined;
-        event.cb();
-      });
+    this._events.forEach(event => {
+      this.on(event);
     });
   }
 
@@ -35,27 +35,38 @@ export class Events {
    * @param {IEvents} event - IEvents - this is the interface that we created earlier.
    */
   public addListener(event: IEvents): void {
-    this._eventEmitter.on(event.name, () => {
-      event.log
-        ? this.app.logger.info(`${event.name} events loaded`)
-        : undefined;
-      event.cb();
-    });
+    this.on(event);
+    this.addEvent(event);
+  }
+
+  private on(event: IEvents) {
+    this._eventEmitter.on(event.name, event.cb);
   }
 
   /**
    * It removes a listener from the event emitter
    * @param {string} eventName - The name of the event to listen for.
    */
-  public removeListener(eventName: string) {
-    try {
-      this._eventEmitter.removeListener(eventName, () => {
-        this.app.logger.info(`removing "${eventName}" listener`);
-      });
-    } catch (e) {
-      this.app.logger.error('An error happened');
-      this.app.logger.error(e);
+  public off(eventName: string) {
+    const event = this.getEventByName(eventName);
+    if (typeof event === 'object') {
+      this._eventEmitter.removeListener(eventName, () => event.cb);
     }
+  }
+
+  /**
+   * It loops through the events array and returns the event object if the event name matches the event name passed in as a
+   * parameter
+   * @param {string} eventName - The name of the event you want to get.
+   * @returns The event object that matches the eventName.
+   */
+  public getEventByName(eventName: string): IEvents | boolean {
+    for (const event of this._events) {
+      if (event.name === eventName) {
+        return event;
+      }
+    }
+    return false;
   }
 
   /**
@@ -63,14 +74,14 @@ export class Events {
    * @param {IEvents} event - IEvents - This is the event that we want to add to the array.
    */
   public addEvent(event: IEvents): void {
-    this._events.push(event);
+    this._events.add(event);
   }
 
-  get events(): Array<IEvents> {
+  get events(): Set<IEvents> {
     return this._events;
   }
 
-  set events(value: Array<IEvents>) {
+  set events(value: Set<IEvents>) {
     this._events = value;
   }
 

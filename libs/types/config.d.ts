@@ -1,16 +1,10 @@
-export interface IEasyApiConfig {}
-
 export interface IPlugin {
   name: string;
+  plugin?: any;
   origin?: string;
   opts?: Object;
   folder?: string;
-  after?: PluginAfterInterface;
-}
-
-export interface IPluginAfter {
-  // Change to fastify plugin type
-  plugin?: Function;
+  after?: Function;
 }
 
 export interface ILogger {
@@ -32,4 +26,11 @@ export interface IEasyApiConstructor {
   env: string;
   port?: number;
   isInContainer?: boolean;
+  auth?: IEasyApiConstructorAuth;
+  defaultPlugin?: boolean;
+}
+
+interface IEasyApiConstructorAuth {
+  secret: string;
+  opts?: Object;
 }
