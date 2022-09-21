@@ -30,13 +30,6 @@ export const loggerConfig: { [index: string]: any } = {
 };
 
 export const defaultConfig: { [index: string]: any } = {
-  db: {
-    server: {},
-    connexionString: '',
-    availableSGBD: ['POSTGRESQL', 'MONGO', 'SQL']
-  },
-  // custom middleware onStart
-  middlewares: [],
   customEnv: {
     dotenv: true,
     schema: {}
