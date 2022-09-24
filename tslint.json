@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "array-type": false,
+    "no-string-literal": false,
+    "no-shadowed-variable": false
+  },
+  "extends": ["tslint:recommended", "tslint-config-prettier"]
+}
