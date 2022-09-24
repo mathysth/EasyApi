@@ -5,7 +5,6 @@ import { IEvents } from '../types/events';
 export class Events {
   private app: EasyApi;
   private _eventEmitter: EventEmitter = new EventEmitter();
-  //todo add getter / setter
   private _events: Set<IEvents> = new Set<IEvents>([
     {
       name: 'start',
