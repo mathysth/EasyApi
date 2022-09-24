@@ -4,30 +4,26 @@ import {
   pluginConfig
 } from './libs/templates/default';
 import { IEasyApiConstructor, ILogger, IPlugin } from './libs/types/config';
-import Fastify, {
-  FastifyInstance,
-  FastifyReply,
-  FastifyRequest
-} from 'fastify';
-import PATH from 'path';
+import Fastify, { FastifyInstance } from 'fastify';
 import pino from 'pino';
 import { Events } from './libs/events/events';
 
-export default class EasyApi {
+class EasyApi {
   private _logger: any;
   public readonly plugins = pluginConfig;
+  public readonly config = defaultConfig;
   private _pluginsConfig: Array<IPlugin> = [
     { name: 'Sensible' },
-    { name: 'UnderPressure', opts: this.plugins['underPressure'] },
-    { name: 'Cors', opts: this.plugins['cors'] },
-    { name: 'Swagger', opts: this.plugins['swagger'] }
+    { name: 'UnderPressure', opts: this.config['underPressure'] },
+    { name: 'Cors', opts: this.config['cors'] },
+    { name: 'Swagger', opts: this.config['swagger'] }
   ];
   private _port: number = 3001;
   private _debug: boolean = true;
   private readonly _isInContainer: boolean = false;
   private readonly app: FastifyInstance = Fastify();
   private _events: Events = new Events(this);
-  // faire un test pour savoir si l'interface crash si tout les champs ne sont pas remplie afin d'assign config a this.config
+
   constructor(config: IEasyApiConstructor) {
     const env: ILogger = loggerConfig[config.env];
     this._port = config.port ? config.port : this.port;
@@ -44,34 +40,14 @@ export default class EasyApi {
    */
   private registerChoices(config: IEasyApiConstructor) {
     if (config.defaultPlugin) {
-      this.register();
-    }
-    if (config.auth) {
-      this._pluginsConfig.push({
-        name: 'Jwt',
-        opts: { ...defaultConfig['jwt'], secret: config.auth.secret },
-        after: () => {
-          this.app.decorate(
-            'authenticate',
-            async (request: FastifyRequest, reply: FastifyReply) => {
-              try {
-                await request.jwtVerify(
-                  config.auth?.opts ? config.auth.opts : {}
-                );
-              } catch (err) {
-                reply.send(err);
-              }
-            }
-          );
-        }
-      });
+      this.registerFastifyPlugin();
     }
   }
 
   /**
    * We're looping through the default plugins config and registering each plugin with the server
    */
-  public register(plugin?: IPlugin) {
+  public registerFastifyPlugin(plugin?: IPlugin) {
     if (plugin) {
       this.registerCustomPlugin(plugin);
     } else {
@@ -172,3 +148,5 @@ export default class EasyApi {
     return this._pluginsConfig;
   }
 }
+
+export default EasyApi;
