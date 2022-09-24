@@ -1,6 +1,6 @@
-import EasyApi from '../app';
 import { FastifyInstance, FastifyPluginCallback } from 'fastify';
 import PATH from 'path';
+import EasyApi from '../src/app';
 
 const dirname = PATH.dirname(__filename);
 const api: EasyApi = new EasyApi({
