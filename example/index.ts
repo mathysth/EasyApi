@@ -1,6 +1,5 @@
 import EasyApi from '../app';
 import { FastifyInstance, FastifyPluginCallback } from 'fastify';
-import recaptchaPl from 'fastify-recaptcha';
 import PATH from 'path';
 
 const dirname = PATH.dirname(__filename);
@@ -23,14 +22,6 @@ api.events.addEvent({
   }
 });
 
-//Register custom plugin
-const recaptchaPlugin = {
-  name: 'fastifyRecaptcha',
-  plugin: recaptchaPl,
-  opts: {}
-};
-api.register(recaptchaPlugin);
-
 // loading routes from file in routes folder
 const routes = {
   // Loading fastify autoload
@@ -42,7 +33,7 @@ const routes = {
     }
   }
 };
-api.register(routes);
+api.registerFastifyPlugin(routes);
 
 //You can also load plugin with autoload plugin
 const plugins = {
@@ -55,7 +46,7 @@ const plugins = {
     }
   }
 };
-api.register(plugins);
+api.registerFastifyPlugin(plugins);
 
 //Start api
 api.start().then(r => {
