@@ -1,16 +1,19 @@
 {
+  "name": "easy-api-mt",
   "author": {
     "name": "Mathys.T",
     "email": "mathysth.contact@gmail.com"
   },
+  "main": "lib/app.js",
   "version": "1.0.0",
+  "description": "An easier way to create api in node",
   "repository": {
     "type": "git",
     "url": "https://github.com/mathysth/EasyApi"
   },
   "license": "GPL-2.0",
   "bugs": {
-    "url": "git+https://github.com/mathysth/EasyApi/issues"
+    "url": "https://github.com/mathysth/EasyApi/issues"
   },
   "keywords": [
     "Api",
@@ -24,7 +27,7 @@
     "postversion": "git push && git push --tags"
   },
   "files": [
-    "build/**/*"
+    "lib/**/*"
   ],
   "dependencies": {
     "@fastify/autoload": "^5.4.0",
