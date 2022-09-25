@@ -37,13 +37,13 @@
     "@fastify/under-pressure": "^8.1.0",
     "@types/node": "^18.7.18",
     "fastify": "^4.5.3",
-    "fastify-plugin": "^4.2.1"
+    "fastify-plugin": "^4.2.1",
+    "pino-pretty": "^9.1.0"
   },
   "devDependencies": {
     "@fastify/mongodb": "^6.1.0",
     "husky": "^8.0.1",
     "lint-staged": "^13.0.3",
-    "pino-pretty": "^9.1.0",
     "prettier": "2.7.1",
     "ts-node": "^10.9.1",
     "tslint": "^6.1.3",
